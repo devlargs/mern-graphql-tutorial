@@ -1,6 +1,11 @@
 const graphql = require("graphql");
 const _ = require("lodash");
 
+const models = {
+    author: require("../models/authors"),
+    book: require("../models/books")
+}
+
 const { 
     GraphQLList,
     GraphQLID,
@@ -55,8 +60,6 @@ const BookType = new GraphQLObjectType({
     })
 });
 
-const Books = new GraphQLList(BookType);
-
 const RootQuery = new GraphQLObjectType({
     name: "RootQueryType",
     fields: {
@@ -87,6 +90,39 @@ const RootQuery = new GraphQLObjectType({
     }
 });
 
+const Mutation = new GraphQLObjectType({
+    name: "Mutation",
+    fields: {
+        addAuthor: {
+            type: AuthorType,
+            args: {
+                name: { type: GraphQLString },
+                age: { type: GraphQLInt },
+            },
+            resolve(parent, args) {
+                const author = new models.author({
+                    name: args.name,
+                    age: args.age
+                });
+                return author.save();
+            }
+        },
+        addBook: {
+            type: BookType,
+            args: {
+                authorId: { type: GraphQLID },
+                genre: { type: GraphQLString },
+                name: { type: GraphQLString },
+            },
+            resolve(parent, { authorId, genre, name }){
+                const book = new models.book({ authorId, genre, name });
+                return book.save();
+            }
+        }
+    }
+})
+
 module.exports = new GraphQLSchema({
-    query: RootQuery
+    query: RootQuery,
+    mutation: Mutation
 });
