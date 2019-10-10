@@ -26,7 +26,6 @@ class BookList extends Component {
         }
     }
     render() {
-        console.log(this.props);
         return (
             <Fragment>
                 <ul id="book-list">
